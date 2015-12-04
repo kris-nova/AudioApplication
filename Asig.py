@@ -23,7 +23,7 @@ class Asig:
             self.segment_lengths = segment_lengths   # segment lengths in seconds
             self.analytics_levels = segment_analytics_levels  # level of analytics for each segment size
             self.delta_time = delta_time  # the time interval between measurements
-            
+            self.source_type = source
             self.nelem = [] # number of elements in each level of segment
 
             for i in range(self.num_seg_sizes):
@@ -31,16 +31,18 @@ class Asig:
                 self.nelem.append(num)
             self.signal = []  # the full signal
             self.intervals = [] # list of segment metadata objects
+            for i in range(self.num_seg_sizes):
+                self.intervals.append([]) 
 
             self.segment_data = []  # nested list of numpy arrays used in segment analysis
-
+            self.indices = []  # list of indices used for placing chunks into each segment
             #set the data type
             self.set_dtype(bytes_per_measurement)
 
             # initialize the numpy arrays for the segment analyses
             for i in range(self.num_seg_sizes):
                 self.segment_data.append(np.zeros(self.nelem[i],dtype = self.dtype))
-
+                self.indices.append(0)
     def check_consistency(self):
         return self.consistent
 
@@ -48,6 +50,19 @@ class Asig:
         if (bytes_per_measurement == 32):
             self.dtype = 'float32'
 
+    def add_chunk(self,chunk):
+        # chunk is a SIGNED number of int or float type
+        self.signal.append(chunk) # add the chunk to the end of the full signal
+        for i in range(self.num_seg_sizes):
+            # place the chunk to each segment
+            self.segment_data[i][self.indices[i]] = chunk        
+            self.indices[i]+=1
+            if (self.indices[i] == self.nelem[i]):
+                pass
+                #self.intervals[i].append(IntervalData(self.segment_data[i],self.analytics_level[i]))
+                #perform analytics on this chunk
+            self.indices[i] = self.indices[i] % self.nelem[i]
+            
 #/////////////////////////////////////////
 # Simple test function for this class            
 def main():    
