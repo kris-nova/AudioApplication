@@ -1,0 +1,2 @@
+Class IntervalData:
+    pass
