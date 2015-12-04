@@ -2,7 +2,7 @@ import numpy as np
 __SOURCE_MIC__ = 0
 #..
 
-class Asig:
+class AudioSignal:
     def __init__ (self,delta_time=.001, segment_lengths = [1], segment_analytics_levels=[0], bytes_per_measurement = 32, source = 0):
         '''
         
@@ -62,6 +62,9 @@ class Asig:
                 #self.intervals[i].append(IntervalData(self.segment_data[i],self.analytics_level[i]))
                 #perform analytics on this chunk
             self.indices[i] = self.indices[i] % self.nelem[i]
+
+    def build_frequencies(self):
+        pass
             
 #/////////////////////////////////////////
 # Simple test function for this class            
@@ -75,7 +78,7 @@ def main():
     measure_dt = 0.01
 
 
-    test_signal = Asig(delta_time = measure_dt, segment_lengths = seg_dt, segment_analytics_levels = seg_levels)
+    test_signal = AudioSignal(delta_time = measure_dt, segment_lengths = seg_dt, segment_analytics_levels = seg_levels)
     print test_signal.check_consistency()
 
 
