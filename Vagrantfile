@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.name = "AudioApplicaton"
-  #   vb.gui = true
+    vb.gui = true
     vb.customize ["modifyvm", :id, "--memory", "512"]
   end
 

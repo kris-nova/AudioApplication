@@ -19,6 +19,10 @@ waf configure
 waf build
 waf install
 
+#Install that library
+cp -rvp build/src/libaubio.so* /usr/local/lib
+export LD_LIBRARY_PATH="/usr/local/lib"
+
 cd python
 python setup.py build
 python setup.py install

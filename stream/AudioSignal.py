@@ -1,9 +1,11 @@
 import numpy as np
-from analytics import IntervalData
+from stream import IntervalData
 __SOURCE_MIC__ = 0
 # ..
 
 class AudioSignal:
+    
+    
     def __init__ (self, delta_time=.001, segment_lengths=[1], segment_analytics_levels=[0], bytes_per_measurement=32, source=0):
         '''
         
@@ -22,7 +24,7 @@ class AudioSignal:
             self.num_seg_sizes = num_seg_sizes
             self.num_analytics_levels = num_analytics_levels
             self.segment_lengths = segment_lengths  # segment lengths in seconds
-            self.analytics_levels = segment_analytics_levels  # level of analytics for each segment size
+            self.analytics_levels = segment_analytics_levels  # level of stream for each segment size
             self.delta_time = delta_time  # the time interval between measurements
             self.source_type = source
             self.nelem = []  # number of elements in each level of segment
@@ -64,8 +66,7 @@ class AudioSignal:
                 #self.intervals = ints
                 j = len(self.intervals[i]) - 1
 #                 print self.intervals[i][j].test_answer, i
-                print b.test_answer,i
-                # perform analytics on this chunk
+                # perform stream on this chunk
             self.indices[i] = self.indices[i] % self.nelem[i]
 
     def build_frequencies(self):
