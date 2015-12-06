@@ -17,8 +17,6 @@ def run_in_house():
         Will run a wave file
     '''
     
-    seg_dt = [1, 2]
-    seg_lvl = [0, 100]
     readframes = 44000
     measure_dt = 1.0 / 44000
     unpackstring = "88000h"
@@ -31,7 +29,7 @@ def run_in_house():
         pass
     all_frames = wav_stream.getnframes()
 
-    aud_sig = AudioSignal.AudioSignal(delta_time=measure_dt, segment_lengths=seg_dt, segment_analytics_levels=seg_lvl)
+    aud_sig = AudioSignal.AudioSignal(delta_time=measure_dt)
     while(all_frames >= 0):
         chunk = wav_stream.readframes(readframes)
         all_frames = all_frames - 1
