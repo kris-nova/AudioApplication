@@ -14,8 +14,8 @@ import numpy as np
 import sys
 
 from pprint import pprint
-from functions import Bright
-from functions import Tight
+#from functions import Bright
+#from functions import Tight
 
 
 class IntervalData:
