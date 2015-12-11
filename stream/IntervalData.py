@@ -27,11 +27,24 @@ class IntervalData:
     '''
 
     #Level 0 analytics:  volume information
+    #Level 0 analytics do not require an FFT
     maxvol  = 0 # max volume over this interval
     minvol  = 0 # min volume over this interval
     meanvol = 0 # mean volume over this interval
     volran  = 0 # just maxvol - minvol
-    stdvol  = 0 # standard deviation of volume over this interval
+    stdvol  = 0 # standard deviation of volume over this TIME interval
+
+    #Level 1 analytics:  Power Information (i.e., FREQUENCY information)
+    central_freq = 0 # power-averaged mean frequency
+    freq_sdev = 0    # standard deviation (2nd moment) of frequency power distribution
+    freq_skew =0     # skewness (3rd moment) of frequency power distribution
+    freq_kurt = 0    # kurtosis (4th moment) of frequency power distribution 
+    minpow = 0       # minimum power
+    maxpow = 0       # maximum power
+    meanpow = 0      # mean power
+    powran = 0       # max power - min power
+    stdpow = 0       # standard deviation of power over this FREQUENCY interval
+
 
     data = [1]
     ''' list
@@ -81,8 +94,35 @@ class IntervalData:
             
         if analytics_level >= 1:
             # RUN LEVEL 1
-            pass
-            
+            # Here we compute the FFT and the Power
+            # These are used for all analytics >= 1
+            data_fft = np.fft.rfft(data)
+            data_power = np.abs(data_fft)**2
+            self.maxpow  = np.max(data_power)
+            self.minpow  = np.min(data_power)
+            self.meanpow = np.mean(data_power)
+            self.powran  = self.maxpow-self.minpow
+            self.stdpow  = np.std(data_power) 
+
+            nframes = len(data)
+            nfreq = nframes//2+1
+            if (len(self.fhz) != nfreq):
+                # The frequency wasn't supplied or has the wrong number of elements
+                # Build the frequency
+                # Note - we may not want to have fhz as an attribute
+                self.fhz = np.empty(nframes,dtype='float32')
+                df = 1.0/(dt*nframes)
+                for i in range(nfreq):
+                    self.fhz[i] = i*df
+            ptotal = np.sum(data_power)
+            numerator = np.sum(data_power*self.fhz)
+            cf = numerator/ptotal
+            self.central_frequency = cf
+            moment = self.fhz-cf
+            self.freq_sdev = np.sum(data_power*(moment**2))
+            self.freq_skew = np.sum(data_power*(moment**3))
+            self.freq_kurt = np.sum(data_power*(moment**4))
+           
         if analytics_level >= 2:
             # RUN LEVEL 2
             pass
