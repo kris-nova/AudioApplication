@@ -1,23 +1,24 @@
+###############################################################################
+#
+# scale
+# 
+#
+# (c) 2015-2016 
+# Soundeavor Holdings LLC
+# All Rights Reserved
+# More Information: `info@soundeavor.com`
+#
+# Author: Nick Featherstone
+# Author: Kris Childress
+#
+###############################################################################
+
 import sys
 
-def get_midi_note_values():
-    '''
-        Returns a dictionary of MIDI note values indexed by number
-    '''
-    i = 0
-    notes = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"]
-    n = 0
-    note_values = {}
-    while i <= 127:
-        note_values[i] = notes[n]
-        i = i + 1
-        if n == 11:
-            n = 0
-        else:
-            n = n + 1
-    return note_values
-
 def get_notes_dict():
+    '''
+        Standardized way of tracking note occurences
+    '''
     notes = {}
     notes["c"] = 0
     notes["c#"] = 0 
@@ -34,6 +35,9 @@ def get_notes_dict():
     return notes
 
 def get_chromatic_scale(fund):
+    '''
+        Will return a chromatic scale based on a fundamental
+    '''
     scale = {}
     notes = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b", "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"]
     i = 0
@@ -47,13 +51,7 @@ def get_chromatic_scale(fund):
         i = i + 1
     return scale
         
-         
-def get_midi_frequency_values():
-    '''
-        Returns a dictionary of MIDI note frequencies indexed by number
-    '''
-    
-def gen_notes(noctaves = 7):
+def gen_notes(noctaves=7):
     """Returns a nested list of notes and associated frequencies over
          the requested range of octaves.
     
@@ -67,34 +65,34 @@ def gen_notes(noctaves = 7):
     """
     # returns a list of notes and their frequencies (in Hz)
     # Noctaves octaves are generated, beginning with C1
-    notes = [] # List of tuples describing notes and their frequencies to be returned
-    funds = [] # fundamental notes
+    notes = []  # List of tuples describing notes and their frequencies to be returned
+    funds = []  # fundamental notes
     
-    #Define a set of fundamental notes, starting with C1
+    # Define a set of fundamental notes, starting with C1
     # 'n' denotes "normal".  's' denotes "sharp"
-    funds.append(("C",32.703,'n')) 
-    funds.append(("C",34.648,'s')) # C1#
-    funds.append(("D",36.708,'n'))
-    funds.append(("D",38.891,'s')) # D1#
-    funds.append(("E",41.203,'n'))
-    funds.append(("F",43.654,'n'))
-    funds.append(("F",46.249,'s')) # F1#, etc.
-    funds.append(("G",48.999,'n'))
-    funds.append(("G",51.913,'s'))
-    funds.append(("A",55.000,'n'))
-    funds.append(("A",58.270,'s'))
-    funds.append(("B",61.735,'n'))
+    funds.append(("C", 32.703, 'n')) 
+    funds.append(("C", 34.648, 's'))  # C1#
+    funds.append(("D", 36.708, 'n'))
+    funds.append(("D", 38.891, 's'))  # D1#
+    funds.append(("E", 41.203, 'n'))
+    funds.append(("F", 43.654, 'n'))
+    funds.append(("F", 46.249, 's'))  # F1#, etc.
+    funds.append(("G", 48.999, 'n'))
+    funds.append(("G", 51.913, 's'))
+    funds.append(("A", 55.000, 'n'))
+    funds.append(("A", 58.270, 's'))
+    funds.append(("B", 61.735, 'n'))
     
-    #Generate the note list by computing harmonics of the fundamentals.
-    #Members of octave X have twice the frequency of members of octave X-1
+    # Generate the note list by computing harmonics of the fundamentals.
+    # Members of octave X have twice the frequency of members of octave X-1
     for j in range(noctaves):
         for item in funds:
-            note = item[0]+str(j+1)
+            note = item[0] + str(j + 1)
             f = item[1]
             sn = item[2]
             if (sn == 's'):
-                note = note+"#"
-            f = f*(2**j)
-            notes.append( (note,f))
+                note = note + "#"
+            f = f * (2 ** j)
+            notes.append((note, f))
     
     return notes

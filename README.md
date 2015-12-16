@@ -1,2 +1,2 @@
 # AudioApplication
-The main components of audio analytics for Soundeavor
+The main components of audio analysis for Soundeavor

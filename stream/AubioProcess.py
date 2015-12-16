@@ -1,7 +1,7 @@
 import sys
 import numpy
 from aubio import source, pitch, freqtomidi, onset
-from resources import Midi
+from analysis import scale
 
 
 class AubioProcess:
@@ -37,7 +37,7 @@ class AubioProcess:
             if read < self.hop_s: break
 
           
-#         scale = Midi.gen_notes()
+#         scale = scale.gen_notes()
 #         a = {}
 #         for p in pitches:
 #             if p == 0.0: continue
@@ -64,9 +64,9 @@ class AubioProcess:
         
         # 
         # Now we have our MIDI pitches, lets analyze    
-        midi_values = Midi.get_midi_note_values()
+        midi_values = scale.get_midi_note_values()
         
-        notes = Midi.get_notes_dict()
+        notes = scale.get_notes_dict()
         for p in pitches:
             if p == 0: continue
             rp = int(round(p))
@@ -75,7 +75,7 @@ class AubioProcess:
             notes[v] = notes[v] + 1
         sorted_notes = sorted(notes.iteritems(), key=lambda (v, k): (k, v), reverse=True)
         fundamental = sorted_notes[0][0]
-        scale = Midi.get_chromatic_scale(fundamental)
+        scale = scale.get_chromatic_scale(fundamental)
         major_indexes = [2, 4, 6, 7, 9]
         non_major_indexes = [1, 3, 5, 8, 10]
         total_major = 0
