@@ -68,10 +68,12 @@ class IntervalData:
     ''' int
     Delta time for the object'''
     
-    def __init__(self, data=[1], analysis_level=0, fhz=[], dt=-1,):
+    def __init__(self, data=[1], analysis_level=0, fhz=[], dt=-1, power = [],pbounds = [],
+        note_frequency = [], plot_info = -1):
         '''
             Will init the class and run accordingly
         '''
+
         self.data = data
         self.analysis_level = analysis_level
         self.fhz = fhz
@@ -97,50 +99,75 @@ class IntervalData:
             
         if analysis_level >= 1:
             # RUN LEVEL 1
-            # Here we compute the FFT and the Power
-            # These are used for all analysis >= 1
-            data_fft = np.fft.rfft(data)
-            data_power = np.abs(data_fft)**2
-            self.maxpow  = np.max(data_power)
-            self.minpow  = np.min(data_power)
-            self.meanpow = np.mean(data_power)
+            # Here we compute gross information about the power spectrum
+            self.maxpow  = np.max(power)
+            self.minpow  = np.min(power)
+            self.meanpow = np.mean(power)
             self.powran  = self.maxpow-self.minpow
-            self.stdpow  = np.std(data_power) 
+            self.stdpow  = np.std(power) 
 
-            nframes = len(data)
-            nfreq = nframes//2+1
-            if (len(self.fhz) != nfreq):
-                # The frequency wasn't supplied or has the wrong number of elements
-                # Build the frequency
-                # Note - we may not want to have fhz as an attribute
-                
-                # Not sure what this was doing, looks like it was just building an empty numpy array?
-                # It was adding more elements than data_power had which caused errors later in the script
-                # This bug is only seen when passing more than 1 element in with data
-                # Kris 12/15/2015
-                 
-                #self.fhz = np.empty(nframes,dtype='float32') 
-                
-                df = 1.0/(dt*nframes)
-                for i in range(nfreq):
-                    self.fhz.append(i*df)
-            ptotal = np.sum(data_power)
-            numerator = np.sum(data_power*self.fhz)
+
+            ptotal = np.sum(power)
+            numerator = np.sum(power*self.fhz)
             cf = numerator/ptotal
             self.central_frequency = cf
             moment = self.fhz-cf
-            self.freq_sdev = np.sum(data_power*(moment**2))
-            self.freq_skew = np.sum(data_power*(moment**3))
-            self.freq_kurt = np.sum(data_power*(moment**4))
+            self.freq_sdev = np.sum(power*(moment**2))
+            self.freq_skew = np.sum(power*(moment**3))
+            self.freq_kurt = np.sum(power*(moment**4))
            
         if analysis_level >= 2:
             # RUN LEVEL 2
-            pass
-            
+            # Bin the power into bins associated with each piano key
+            self.binned = self.bin_pow(power,fhz,pbounds)
+            self.binned = self.binned/np.max(self.binned)
+            if (plot_info != -1):
+                plot_info.set_data(note_frequency, self.binned)
         if analysis_level >= 3:
             # RUN LEVEL 3
-            pass
+            # compute basic stats on the power within each bin
+            self.note_stats = self.bin_stats(power,fhz,pbounds)
             
         if analysis_level >= 4:
             # RUN LEVEL 4
             pass
+
+    #///////////////////////////////////////////////////////////////////
+    #Loop over the power spectrum, sum the power within each bin
+    def bin_pow(self,power,frequency,bounds):
+        num_notes = len(bounds)
+        note_pow = np.empty(num_notes,dtype = 'float32')
+
+        df = frequency[1]-frequency[0]
+        for i in range(num_notes):
+            i0 = int(bounds[i][0]/df)
+            i1 = int(bounds[i][1]/df)
+            psum = np.sum(power[i0:i1])
+            note_pow[i] = psum
+        return note_pow
+
+    def bin_stats(self,power,frequency,bounds):
+        num_notes = len(bounds)
+        nstats = 4
+        note_stats = np.zeros((num_notes,nstats),dtype = 'float32')
+
+        df = frequency[1]-frequency[0]
+        for i in range(num_notes):
+            i0 = int(bounds[i][0]/df)
+            i1 = int(bounds[i][1]/df)
+            if (i0 != i1):
+                pslice = power[i0:i1]
+
+                ptotal = np.sum(pslice)
+                numerator = np.sum(pslice*frequency[i0:i1])
+                cf = numerator/ptotal
+                note_stats[i][0] = cf
+                moment = frequency[i0:i1]-cf
+                sdev = np.sum(pslice*(moment**2))
+                note_stats[i][1] = sdev
+                skew = np.sum(pslice*(moment**3))
+                note_stats[i][2] = skew
+                kurt = np.sum(pslice*(moment**4))
+                note_stats[i][3] = kurt
+
+        return note_stats

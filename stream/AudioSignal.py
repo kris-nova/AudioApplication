@@ -18,7 +18,7 @@ import sys
 import operator
 
 from pprint import pprint
-from stream import IntervalData
+from stream import IntervalData as ID
 from analysis import variables
 from stream import music_scale as ms
 # DEF  - Default (unknown)
@@ -191,6 +191,7 @@ class AudioSignal:
 
         self.nseg_sizes = len(self.seg_sizes)
         for i in range(self.nseg_sizes):
+            self.intervals.append([]) # build up the list to hold the intervals
             nt = self.seg_sizes[i]
             a = np.zeros(nt,dtype='float32')
             self.segment_data.append(a)
@@ -279,26 +280,19 @@ class AudioSignal:
                     self.workspace[i][0:i1] = self.segment_data[i][0:i1]*self.window_functions[i][i2:nt]
                     self.workspace[i][i1:nt] = self.segment_data[i][i1:nt]*self.window_functions[i][0:i2]
                     self.segment_power[i][0:nt] = np.abs(np.fft.rfft(self.workspace[i]))
+                    if (self.analysis_level[i] > 1):
+                        pinfo = plot_info
+                    else:
+                        pinfo = -1
 
-                    #print i0, i1, i2
-                    #plt.subplot(311)
-                    #plt.plot(self.segment_data[i])
-                    #plt.subplot(312)
-                    #plt.plot(self.segment_frequency[i],self.segment_power[i])
-                    #plt.subplot(313)
-                    #plt.plot(self.workspace[i])
-                    binned = self.bin_pow(self.segment_power[i],self.segment_frequency[i],self.bounds)
-                    binned = binned/np.max(binned)
-                    if (i == 0 and plot_info != -1):
-                        #plt.plot(self.note_frequency,binned,'ro')
-                        #plt.show()
-                        #print 'showing!'
-                        plot_info.set_data(self.note_frequency,binned)
-                    #interval = IntervalData.IntervalData(self.analysis_level[i],data, power = self.power[i], freq = self.frequency[i])
+                    this_interval = ID.IntervalData(data = self.workspace[i],power = self.segment_power[i], 
+                                        fhz = self.segment_frequency[i], analysis_level = self.analysis_level[i],
+                                        dt = self.dt, pbounds = self.bounds,plot_info = pinfo, note_frequency = self.note_frequency)
                 else:
-                    #interval = IntervalData.IntervalData(self.analysis_level[i],data)
                     pass
+                    #this_interval = ID.IntervalData(data = self.workspace[i],analysis_level = self.analysis_level[i])
 
+                self.intervals[i].append(this_interval)
                 #self.intervals[i].append(interval)
             self.tindex[i] += self.chunk_size
             self.tindex[i] = self.tindex[i] % nt  #Keep the time index within the appropriate range

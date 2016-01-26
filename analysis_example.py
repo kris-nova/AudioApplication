@@ -24,7 +24,7 @@ def main():
     # The following intervals are indicated in terms of sample count
     segment_interval = [chunk_size  ,chunk_size*3] # analyze in intervals separated by 1/30th and 1/10th of a second
     segment_length   = [chunk_size*5,chunk_size*15] # analyze intervals that are 1/10th and 3/10th of a second long
-    analysis_level = [1,1] #same analysis level for now
+    analysis_level = [3,1] #two different analysis levels
 
     segment_info = [segment_interval, segment_length, analysis_level]
     aud_sig = AS.AudioSignal(chunk_size,delta_time=dt,seg_par = segment_info)
